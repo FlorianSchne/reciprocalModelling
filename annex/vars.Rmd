@@ -1,0 +1,236 @@
+---
+title: "Predicting ecosystem responses by data-driven reciprocal modelling"
+subtitle: "Supplementary Material"
+author: "Florian Schneider, Christopher Poeplau and Axel Don"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: pdf_document 
+papersize: a4
+bibliography: literature.bib
+csl: global-change-biology.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=F)
+knitr::opts_chunk$set(dev = 'pdf')
+library(tidyverse)
+options(dplyr.summarise.inform = FALSE)
+library(here)
+library(kableExtra)
+library(sf)
+library(latex2exp)
+library(patchwork)
+
+goodData=readRDS(here("data","derived",
+                      "goodData.rds")) %>% 
+  mutate(obs=OCstock)
+
+europe=st_as_sf(rnaturalearth::countries110) %>%
+  filter(region_un=="Europe"&!(name%in%c('Russia',"Ukraine","Belarus","Moldova"))) %>%
+  st_crop(xmin=-10,
+          xmax=45,
+          ymin=30,
+          ymax=73)
+```
+
+## Overview of explanatory variables
+Table 1. Variables used in the LUCAS case study. Sources: lucas [@Jones2020; @Orgiazzi2018], worldclim [@Fick2017; @Harris2014], ef_lus_allcrops [@ef_lus_allcrops], ef_lus_main [@ef_lus_main], ef_m_farmleg [@ef_m_farmleg], aei_fm_ms [@aei_fm_ms], ef_lsk_main [@ef_lsk_main], aei_ps_inp [@aei_ps_inp], aei_fm_usefert [@aei_fm_usefert], ef_mp_irri [@ef_mp_irri], opendatascience [@opendatascience].
+```{r table}
+options(knitr.kable.NA = '')
+vars=readxl::read_excel(here("vars.xlsx")) %>%
+  filter(class0!="0info",
+         modelEffect==1) %>% 
+  ungroup() %>% 
+  arrange(desc(class0)) %>% 
+  mutate(modelSOC=ifelse(modelSOC==1,"x",""),
+         modelEffect=ifelse(modelEffect==1,"x",""),
+         nameFull=str_trunc(nameFull,50,"right"),
+         type=case_when(name=="Soil_Stones"~"F(4)",
+                        type=="numeric"~"C",
+                        T~paste0("F(",nlevs,")")))
+
+temp=vars %>% 
+  mutate(row=row_number(),
+         class0=ifelse(class0=="target","soil",class0)) %>% 
+  group_by(class0) %>% 
+  summarise(min=min(row),
+            max=max(row))
+
+vars %>% 
+  select(nameFull,type,unit,modelSOC,modelEffect,source) %>% 
+  kbl(col.names = c("Name",
+                    "Type*",
+                    "Unit$^{\\dagger}$",
+                    "SOC stock",
+                    "effect size",
+                    "Source"),
+      longtable=T,
+      booktabs=T,
+      escape=F) %>% 
+  kable_paper(font_size=6) %>% 
+  add_header_above(c(" "=1," "=1," "=1,"Explanatory variable for"=2," "=1)) %>% 
+  footnote(symbol =c("C = Continuous variable; F(L) = Categorical variable with L levels",
+                     "UAA = Utilizable (total) agricultural area")) %>% 
+  pack_rows("Pedosphere",temp$min[temp$class0=="soil"],temp$max[temp$class0=="soil"]) %>%
+  pack_rows("Geosphere",temp$min[temp$class0=="geo"],temp$max[temp$class0=="geo"]) %>%
+  pack_rows("Atmosphere",temp$min[temp$class0=="clim"],temp$max[temp$class0=="clim"]) %>%
+  pack_rows("Anthroposphere",temp$min[temp$class0=="anthro"],temp$max[temp$class0=="anthro"])
+
+```
+
+## Maps
+```{r mapSoil, message=F, warning=F, fig.width=7, fig.height = 11, out.width = "\\textwidth", results='asis'}
+# Soil variables
+dat=vars %>%
+  filter(type=="C") %>%
+  select(name,nameFull,unit)
+
+# Create 4 row x 5 column grid
+grid=expand.grid(row=LETTERS[seq(from=1,to=4)],
+                 col=1:4) %>%
+  arrange(row)
+
+dat=dat %>%
+  mutate(tot=row_number(),
+         page=ceiling(row_number()/nrow(grid))) %>%
+  group_by(page) %>%
+  mutate(temp=row_number(),
+         pos=paste0(grid$row,grid$col)[temp]) %>%
+  ungroup() %>%
+  select(-temp)
+
+for(n in 1:max(dat$page)){
+  for(m in 1:nrow(grid)){
+
+    item=paste0(grid$row,grid$col)[m]
+    case=dat %>%
+       filter(page==n,
+              pos==item)
+
+    if(nrow(case)==0) {
+
+      assign(item,
+             plot_spacer())
+
+    } else {
+
+  sub=goodData %>%
+    select(Point_ID,lon,lat,one_of(case %>% pull(name))) %>%
+    drop_na() %>%
+    st_as_sf(coords = c("lon", "lat"),
+             crs = 4326)
+  names(sub)[2]="target"
+
+    bks2 = cartography::getBreaks(v = sub$target, nclass = 5,  method = "fisher-jenks")
+    bks2.round=bks2
+    if(median(bks2)>.001){
+      bks2.round=round(bks2,4)
+    }
+    if(median(bks2)>.01){
+      bks2.round=round(bks2,3)
+    }
+    if(median(bks2)>.1){
+      bks2.round=round(bks2,2)
+    }
+    if(median(bks2)>1){
+      bks2.round=round(bks2,1)
+    }
+    if(median(bks2)>10){
+      bks2.round=round(bks2,0)
+    }
+    if(median(bks2)>100){
+      bks2.round=round(bks2,0)
+    }
+    pal = colorspace::sequential_hcl(5,"YlGnBu",rev=T)
+
+hist=ggplot(sub,
+            aes(target)) +
+  geom_histogram(breaks=bks2,
+                 fill=pal) +
+  scale_x_continuous(breaks=bks2,
+                     labels=bks2.round,
+                     guide=guide_axis(n.dodge=2))+
+  scale_y_continuous(expand = c(0,0))+
+  theme_void()+
+  theme(axis.ticks.x=element_line(colour="black",size=.1),
+        axis.ticks.length=unit(2, "pt"),
+        axis.text.x=element_text(size=6),
+        plot.caption=element_text(size=6),
+        panel.grid = element_blank(),
+        panel.border = element_blank())
+if(!is.na(case$unit)){
+  hist=hist+
+    labs(caption=TeX(case$unit))
+  }
+
+plot=ggplot() +
+  labs(title=paste(strwrap(case$nameFull,
+                           width = 30),
+                   collapse = "\n"))+
+  geom_sf(data = europe,
+          fill = "white",
+          size = .2) +
+  geom_sf(data = sub %>%
+            mutate(target=Hmisc::cut2(target,cuts=bks2)),
+          aes(color = target),
+          size = .001)+
+  scale_color_manual(values=pal) +
+  theme_void(base_size =6)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        legend.position="none")
+
+plot=plot/(plot_spacer()+hist+plot_spacer()+plot_layout(widths=c(.1,1,.1)))+plot_layout(heights=c(1.5,.1))
+assign(item,plot)
+       }
+  }
+ page=(A1|A2|A3|A4)/
+   (B1|B2|B3|B4)/
+   (C1|C2|C3|C4)/
+   (D1|D2|D3|D4)
+ # assign(paste0("page",n),page)
+ print(page)
+ cat("\n\n\\pagebreak\n")
+ }
+# page
+
+```
+
+\newpage
+## SOC data of alkaline soils
+In the present study, sites with CaCa$_3$ contents above 5\% were omitted. The reason for this was high scatter in the C:N ratio of alkaline soils, indicating substantial analytic uncertainties in SOC measurements of soil with inorganic carbon (see Figure below).  
+
+```{r caco3, echo=FALSE, message=F, warning=F,fig.height = 3, fig.width = 4.5, unit = "cm", fig.align = "center"}
+readRDS(here("data","derived",
+                      "rawData.rds")) %>% 
+    ggplot(aes(pH_H2O,OC/N,
+             col=CaCO3<5))+
+  geom_point(shape=1,alpha=.2,size=.3)+
+  colorspace::scale_color_discrete_qualitative(palette = "Dark 3")+
+  scale_y_log10()+
+  labs(x=expression('pH'["H2O"]),
+       y="C:N ratio",
+       col=expression('CaCO'[3]~'< 5 %'))+
+  guides(colour = guide_legend(override.aes = list(size=3,alpha=1)))+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+
+```
+
+
+
+\newpage
+
+## References
+\vspace{-.55cm}
+\setlength{\parindent}{-0.2in}
+\setlength{\leftskip}{0.2in}
+\setlength{\parskip}{8pt}
+
+\noindent
+
+<div id="refs"></div>
+
+```{r refmgr references, results="asis", echo=FALSE}
+# PrintBibliography(bib) 
+```

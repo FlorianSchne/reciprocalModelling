@@ -1,0 +1,4 @@
+# LUCAS_Topsoil_2015_20200323.xlsx
+# LUCAS2015_AncillaryData_20201007.csv
+# LUCAS 2015 TOPSOIL data
+# Source: https://esdac.jrc.ec.europa.eu/content/lucas2015-topsoil-data

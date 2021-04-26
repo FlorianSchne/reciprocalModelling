@@ -1,0 +1,4 @@
+# LUCAS_Topsoil_2015_20200323.shp
+# ... and associated .cpg .dbf .prj .shx
+# Coordinates of LUCAS sites
+# Source: https://esdac.jrc.ec.europa.eu/content/lucas2015-topsoil-data

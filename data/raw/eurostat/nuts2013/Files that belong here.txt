@@ -1,0 +1,4 @@
+# NUTS_RG_01M_2013_4326.shp
+# ... and associated .cpg .dbf .prj .shx
+# NUTS polygons in 2013
+# Source: https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/nuts

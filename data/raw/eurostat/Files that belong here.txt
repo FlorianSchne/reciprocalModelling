@@ -1,0 +1,3 @@
+# EU_2015_20200225.CSV
+# LUCAS primary data 2015. LUCAS micro data 2015
+# Source: https://ec.europa.eu/eurostat/web/lucas/data/primary-data/2015

@@ -1,0 +1,2 @@
+# gh_raster_layers.csv
+# Source: https://gitlab.com/geoharmonizer_inea/eumap/-/blob/master/gh_raster_layers.csv

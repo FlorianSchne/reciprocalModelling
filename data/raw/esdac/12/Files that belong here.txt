@@ -1,0 +1,4 @@
+# Bulgaria.xlsx
+# Romania.xlsx
+# LUCAS 2012 TOPSOIL data
+# Source: https://esdac.jrc.ec.europa.eu/content/lucas-2009-topsoil-data
