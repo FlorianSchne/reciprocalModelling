@@ -1,8 +1,8 @@
 ## Modified version of Hanna Meyer's CAST::aoa function
 # https://github.com/HannaMeyer/CAST/blob/master/R/aoa.R
-# Meyer, H., Pebesma, E. (2020): Predicting into unknown space? Estimating the 
-#   area of applicability of spatial prediction models. 
-#   http://arxiv.org/abs/2005.07939
+# Meyer, H. and Pebesma, E. (2021), Predicting into unknown space? 
+# Estimating the area of applicability of spatial prediction models. 
+# Methods in Ecology and Evolution. https://doi.org/10.1111/2041-210X.13650
 
 aoa1=function (newData = NULL,
                train = NULL,

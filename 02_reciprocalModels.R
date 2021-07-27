@@ -117,9 +117,8 @@ print(paste0("Train in ",ref," to predict SOC in ",c("Cropland","Grassland")[!(c
 # 
 # cv %>%
 #   summarise(RMSE=sqrt(mean((pred - obs)^2)),
-#             R2=cor(pred,obs)^2,
-#             RPD=sd(obs)/RMSE,
-#             RPIQ=IQR(obs)/RMSE) # R2=0.60 (same as OOB error)
+#             R2=1 - sum((pred - obs)^2) / sum((obs - mean(obs))^2),
+#             bias=mean(obs)- mean(pred))
 
 # Export files for further analyses
 saveRDS(train0,here("data","derived",paste0(direction,"_train0.rds")))
@@ -445,9 +444,8 @@ print(paste0("Train in ",c("Cropland","Grassland")[!(c("Cropland","Grassland")%i
 # 
 # cv %>%
 #   summarise(RMSE=sqrt(mean((pred - effect)^2)),
-#             R2=cor(pred,effect)^2,
-#             RPD=sd(effect)/RMSE,
-#             RPIQ=IQR(effect)/RMSE) # R2=0.43 (same as OOB error)
+#             R2=1 - sum((pred - effect)^2) / sum((effect - mean(effect))^2),
+#             bias=mean(effect)- mean(pred)) # R2=0.43 (similar as OOB error)
 
 saveRDS(train1,here("data","derived",paste0(direction,"_train1.rds")))
 saveRDS(model1,here("data","derived",paste0(direction,"_model1.rds")))
