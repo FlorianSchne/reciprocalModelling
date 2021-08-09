@@ -1,4 +1,5 @@
 ## Data-driven, reciprocal modelling
+[![DOI](https://zenodo.org/badge/361658050.svg)](https://zenodo.org/badge/latestdoi/361658050)
 
 This repository contains R scripts, which were used for the following paper:   
 Schneider, F., Poeplau, C., & Don, A. (2021). Predicting ecosystem responses by data-driven reciprocal modelling. Global Change Biology. [doi:10.1111/gcb.15817](https://doi.org/10.1111/gcb.15817)  
