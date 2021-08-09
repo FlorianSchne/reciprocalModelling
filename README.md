@@ -1,7 +1,8 @@
 ## Data-driven, reciprocal modelling
 
 This repository contains R scripts, which were used for the following paper:   
-Schneider, F., Poeplau, C., & Don, A. (submitted). Predicting ecosystem responses by data-driven reciprocal modelling.
+Schneider, F., Poeplau, C., & Don, A. (2021). Predicting ecosystem responses by data-driven reciprocal modelling. Global Change Biology. [doi:10.1111/gcb.15817](https://doi.org/10.1111/gcb.15817)  
+
 
 Here, we (the authors) provide materials to reproduce the case study about soil organic carbon. The goal was to quantify the amount of atmospheric carbon that could be sequestered in European agricultural soils if today's cropland were converted to grassland. 
 
